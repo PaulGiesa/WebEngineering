@@ -23,15 +23,17 @@ server.listen(port,hostname, ()  => {
 
 app.use(bodyParser.json());
 
-app.get('/home', function(req, res){
+  app.get('/', function(req, res){
   res.setHeader('Content-Type', 'text/plain');
-  res.end('Hallo Welt!')
+  res.end('Got a get request')
 });
 
 app.post('/', function(req, res){
-  res.send('Got a Post request')
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('Got a Post request')
 });
 
-app.put('/user', function(req, res){
+app.put('/', function(req, res){
+  res.setHeader('Content-Type', 'text/plain');
   res.send('Got a Put request')
 });
