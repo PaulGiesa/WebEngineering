@@ -20,6 +20,8 @@ router.get('/', function(req, res) {
 //    Body:x-www-forum-urlencoded
 //    username    xx
 //    password    xx
+
+
 router.put('/login', function(req, res) {
   // username correct?
   if (req.body.username != user.username) {
@@ -46,12 +48,48 @@ router.put('/login', function(req, res) {
   }
 });
 
-// TODO: route middleware to verify a token
+// route middleware to verify a token
+router.use(function(req, res, next) {
+
+  // check header or url parameters or post parameters for token
+  var token = req.body.token || req.query.token || req.headers['x-access-token'];
+
+  // decode token
+  if (token) {
+
+    // verifies secret and checks exp
+    jwt.verify(token,'TheSecretIsAStiiift', function(err, decoded) {
+      if (err) {
+        return res.json({ success: false, message: 'Failed to authenticate token.' });
+      } else {
+        // if everything is good, save to request for use in other routes
+        req.decoded = decoded;
+        next();
+      }
+    });
+
+  } else {
+
+    // if there is no token
+    // return an error
+    return res.status(403).send({
+        success: false,
+        message: 'Wrong token'
+    });
+  }
+});
 
 // route to show a random message (GET http://localhost:8080/api/)
 router.get('/', function(req, res) {
   res.json({ message: 'Welcome to the coolest API on earth!' });
 });
 
+router.put('/passwordRecovery', function(req, res){
+  if (!res.locals.authenticated) {
+    res.status(403).send();
+    res.json({ message: 'You should log in!' });
+        return;
+      }
+      });
 
 module.exports = router;
