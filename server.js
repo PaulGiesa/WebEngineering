@@ -9,6 +9,12 @@ var user = require('./model/user'); // get users from file
 
 var routes = require('./controller/routes'); //routes defined here
 
+// use body parser to get information from POST
+// needs to be before app.use
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
 app.use('/api/V1',routes);
 
 // =======================
@@ -17,9 +23,7 @@ app.use('/api/V1',routes);
 var port = process.env.PORT || 8080; // used to create, sign, and verify tokens
 app.set('superSecret', config.secret); // secret variable
 
-// use body parser so we can get info from POST and/or URL parameters
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+
 
 // use morgan to log requests to the console
 app.use(morgan('dev'));
