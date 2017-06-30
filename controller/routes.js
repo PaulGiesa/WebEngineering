@@ -85,11 +85,33 @@ router.get('/', function(req, res) {
 });
 
 router.put('/passwordRecovery', function(req, res){
-  if (!res.locals.authenticated) {
-    res.status(403).send();
-    res.json({ message: 'You should log in!' });
-        return;
-      }
-      });
+
+     if (req.body.password != user.password) {
+     res.status(403).json({
+       message: 'Your Password is wrong!'
+     });
+     return;
+   }
+
+   user.password = req.body.newPassword;
+   var token = jwt.sign({
+     exp: Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour expiry
+     username: user.username
+   }, 'TheSecretIsAStiiift');
+
+   var fs = require('fs');
+
+   fs.writeFile('./model/user.json', JSON.stringify(user), 'utf-8', (err) => {
+     if (err) {
+       res.status(500).json({error: err});
+     } else {
+       res.status(200).json({
+         token: token,
+        message: 'Password changed successfully'});
+     }
+   });
+ });
+
+
 
 module.exports = router;
