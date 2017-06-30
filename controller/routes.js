@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
+
 var user = require('../model/user')
 var controllerUser = require('../controller/user'); // functions of user
 var controllerBlog = require('../controller/blog'); // functions of blog
@@ -8,7 +9,7 @@ var controllerBlog = require('../controller/blog'); // functions of blog
 
 // basic route
 router.get('/', function(req, res) {
-    res.send('Welcome to Stiiift-Site! The API is at http://localhost:' + port + '/api');
+    res.send('Welcome to Stiiift-Site!');
 });
 
 // API ROUTES -------------------
@@ -56,3 +57,6 @@ router.put('/login', function(req, res) {
 router.get('/', function(req, res) {
   res.json({ message: 'Welcome to the coolest API on earth!' });
 });
+
+
+module.exports = router;

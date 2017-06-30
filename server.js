@@ -28,4 +28,4 @@ app.use(morgan('dev'));
 // start the server ======
 // =======================
 app.listen(port);
-console.log('Magic happens at http://localhost:' + port);
+console.log('Stiiift needed at http://localhost:' + port);
