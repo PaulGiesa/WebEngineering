@@ -1,17 +1,38 @@
-var express = require('express');
-var app = express();
+var express     = require('express');
+var app         = express();
+var bodyParser  = require('body-parser');
+var morgan      = require('morgan');
 
-app.get('/', function (req, res) {
-   res.send('Hello World');
-})
+var jwt    = require('jsonwebtoken'); // used to create, sign, and verify tokens
+var config = require('./config'); // get our config file
+var User   = require('./models/user'); // get our mongoose model
 
-app.put('/home', function (req, res) {
-   res.send('got a set');
-})
+// =======================
+// configuration =========
+// =======================
+var port = process.env.PORT || 8080; // used to create, sign, and verify tokens
+app.set('superSecret', config.secret); // secret variable
 
-var server = app.listen(3000, function () {
-   var host = server.address().address
-   var port = server.address().port
+// use body parser so we can get info from POST and/or URL parameters
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-   console.log("Example app listening at http://%s:%s", host, port)
-})
+// use morgan to log requests to the console
+app.use(morgan('dev'));
+
+// =======================
+// routes ================
+// =======================
+// basic route
+app.get('/', function(req, res) {
+    res.send('Hello! The API is at http://localhost:' + port + '/api');
+});
+
+// API ROUTES -------------------
+// we'll get to these in a second
+
+// =======================
+// start the server ======
+// =======================
+app.listen(port);
+console.log('Magic happens at http://localhost:' + port);
