@@ -5,7 +5,7 @@ var morgan      = require('morgan');
 
 var jwt    = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get our config file
-var User   = require('./models/user'); // get our mongoose model
+var User   = require('./model/user'); // get our mongoose model
 
 // =======================
 // configuration =========
@@ -44,6 +44,7 @@ apiRoutes.get('/', function(req, res) {
 
 // apply the routes to our application with the prefix /api
 app.use('/api', apiRoutes);
+
 // =======================
 // start the server ======
 // =======================
