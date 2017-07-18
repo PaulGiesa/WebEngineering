@@ -3,10 +3,34 @@ var router = express.Router();
 var jwt = require('jsonwebtoken');
 var app= express();
 
-var user = require('../model/user.json')
+var blog = require('../model/blog.json');
+var user = require('../model/user.json');
 var controllerUser = require('../controller/user'); // functions of user
 var controllerBlog = require('../controller/blog'); // functions of blog
 // Wurzelroute in Server.js definiert --> /api/V1
+
+var isAuthenticated = false;
+
+//Error-Messages
+//TODO wenn hidden == true - beide
+function forbidden_token(req, res){
+  res.status(403).send({
+          success: false,
+          message: 'Wrong token'
+      });
+}
+function not_authorized_401(req, res){
+  res.status(401).send({
+        success: false,
+        message: 'No valid authentification'
+  });
+}
+function not_found(req, res){
+  res.status(404).send({
+        success: false,
+        message: 'Page not found'
+  });
+}
 
 // basic route
 router.get('/', function(req, res) {
@@ -60,9 +84,15 @@ router.use(function(req, res, next) {
     // verifies secret and checks exp
     jwt.verify(token,'TheSecretIsAStiiift', function(err, decoded) {
       if (err) {
-        return res.json({ success: false, message: 'Failed to authenticate token.' });
+        isAuthenticated = false;
+        next();
+/*        res.json({ success: false,
+          message: 'Failed to authenticate token.'
+        });*/
+
       } else {
         // if everything is good, save to request for use in other routes
+        isAuthenticated = true;
         req.decoded = decoded;
         next();
       }
@@ -72,20 +102,22 @@ router.use(function(req, res, next) {
 
     // if there is no token
     // return an error
-    return res.status(403).send({
+    isAuthenticated = false;
+    next();
+/*    res.status(403).send({
         success: false,
         message: 'Wrong token'
-    });
+    });*/
   }
 });
+// through this function, every route beneath this function has a verified token (or not) --> isAuthenticated
 
-// route to show a random message (GET http://localhost:8080/api/)
 router.get('/', function(req, res) {
   res.json({ message: 'Welcome to the coolest API on earth!' });
 });
 
 router.put('/passwordRecovery', function(req, res){
-
+  if(isAuthenticated){
      if (req.body.password != user.password) {
      res.status(403).json({
        message: 'Your Password is wrong!'
@@ -95,7 +127,7 @@ router.put('/passwordRecovery', function(req, res){
 
    user.password = req.body.newPassword;
    var token = jwt.sign({
-     exp: Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour expiry
+     expiresInMinutes: 60*24, // 24h
      username: user.username
    }, 'TheSecretIsAStiiift');
 
@@ -110,8 +142,29 @@ router.put('/passwordRecovery', function(req, res){
         message: 'Password changed successfully'});
      }
    });
- });
+ }
+ else{
+   forbidden_token(req, res);
+ }
+});
 
+//need key "x-access-token" in header with jwt key as value
+router.get('/blog', function(req, res){
+  if(isAuthenticated){
+    res.json(blog);
+  }
+  else{
+    res.json(blog.filter((blogs) => {
+      return !blogs.hidden;
+    }));
+  }
+});
 
+//in progregg
+//router.route('blog/:id(\\d+)') // \\d+ == digit (regex, at least one)
+                                //:id => stores the digit in req.params.id
+//  .get(controllerBlog.get_b)
+//  .delete(/*function*/)
+//  .put(/*function*/ else{ not_authorized_401(req, res); });
 
 module.exports = router;
