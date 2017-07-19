@@ -32,6 +32,20 @@ function not_found(req, res){
   });
 }
 
+/*
+function hidden_no_auth(req, res){
+  if(!blog[req.params.id]){       //blog id doesn't exist
+    not_found(req, res);
+    return;
+  }
+
+  if(!isAuthenticated && blog[req.params.id].hidden){  //not accessible -> hidden = true
+    not_authorized_401(req,res);
+    return;
+  }
+}
+*/
+
 // basic route
 router.get('/', function(req, res) {
     res.send('Welcome to Stiiift-Site!');
@@ -44,7 +58,6 @@ router.get('/', function(req, res) {
 //    Body:x-www-forum-urlencoded
 //    username    xx
 //    password    xx
-
 
 router.put('/login', function(req, res) {
   // username correct?
@@ -86,9 +99,6 @@ router.use(function(req, res, next) {
       if (err) {
         isAuthenticated = false;
         next();
-/*        res.json({ success: false,
-          message: 'Failed to authenticate token.'
-        });*/
 
       } else {
         // if everything is good, save to request for use in other routes
@@ -99,19 +109,13 @@ router.use(function(req, res, next) {
     });
 
   } else {
-
     // if there is no token
-    // return an error
     isAuthenticated = false;
     next();
-/*    res.status(403).send({
-        success: false,
-        message: 'Wrong token'
-    });*/
   }
 });
-// through this function, every route beneath this function has a verified token (or not) --> isAuthenticated
 
+// through this function, every route beneath this function has a verified token (or not) --> isAuthenticated
 router.get('/', function(req, res) {
   res.json({ message: 'Welcome to the coolest API on earth!' });
 });
@@ -160,11 +164,45 @@ router.get('/blog', function(req, res){
   }
 });
 
-//in progregg
-//router.route('blog/:id(\\d+)') // \\d+ == digit (regex, at least one)
+//all routes for /blog/[number]
+router.route('/blog/:id(\\d+)') // \\d+ == digit (regex, at least one)
                                 //:id => stores the digit in req.params.id
-//  .get(controllerBlog.get_b)
-//  .delete(/*function*/)
-//  .put(/*function*/ else{ not_authorized_401(req, res); });
+  .get(function(req, res){
+    if(!blog[req.params.id]){       //blog id doesn't exist
+      not_found(req, res);
+      return;
+    }
+
+    if(!isAuthenticated && blog[req.params.id].hidden){  //not accessible -> hidden = true
+      not_authorized_401(req,res);
+      return;
+    }
+    controllerBlog.get_b(req, res);
+    })
+
+  .delete(function(req, res){
+    if(!blog[req.params.id]){       //blog id doesn't exist
+      not_found(req, res);
+      return;
+    }
+
+    if(!isAuthenticated && blog[req.params.id].hidden){  //not accessible -> hidden = true
+      not_authorized_401(req,res);
+      return;
+    }
+    controllerBlog.delete_b(req,res);
+  })
+  .put(function(req, res){
+    if(!blog[req.params.id]){       //blog id doesn't exist
+      not_found(req, res);
+      return;
+    }
+
+    if(!isAuthenticated && blog[req.params.id].hidden){  //not accessible -> hidden = true
+      not_authorized_401(req,res);
+      return;
+    }
+    controllerBlog.edit_b(req, res);
+  );
 
 module.exports = router;
