@@ -86,8 +86,9 @@ router.put('/login', function(req, res) {
 });
 
 // route middleware to verify a token
+// through the following function, every route beneath this function
+// has a verified token (or not) --> isAuthenticated
 router.use(function(req, res, next) {
-
   // check header or url parameters or post parameters for token
   var token = req.body.token || req.query.token || req.headers['x-access-token'];
 
@@ -115,7 +116,6 @@ router.use(function(req, res, next) {
   }
 });
 
-// through this function, every route beneath this function has a verified token (or not) --> isAuthenticated
 router.get('/', function(req, res) {
   res.json({ message: 'Welcome to the coolest API on earth!' });
 });
@@ -153,16 +153,29 @@ router.put('/passwordRecovery', function(req, res){
 });
 
 //need key "x-access-token" in header with jwt key as value
-router.get('/blog', function(req, res){
-  if(isAuthenticated){
-    res.json(blog);
-  }
-  else{
-    res.json(blog.filter((blogs) => {
-      return !blogs.hidden;
-    }));
-  }
-});
+//all routes for /blog
+router.route('/blog')
+
+  .get(function(req, res){
+    if(isAuthenticated){
+      res.json(blog);
+    }
+    else{
+      res.json(blog.filter((blogs) => {
+        return !blogs.hidden;
+      }));
+    }
+  })
+
+  .post(function(req, res){
+    if(!isAuthenticated){  //not accessible -> hidden = true
+      not_authorized_401(req,res);
+      return;
+    }
+    else{
+      controllerBlog.create_b(req, res)
+    };
+  });
 
 //all routes for /blog/[number]
 router.route('/blog/:id(\\d+)') // \\d+ == digit (regex, at least one)
@@ -179,7 +192,6 @@ router.route('/blog/:id(\\d+)') // \\d+ == digit (regex, at least one)
     }
     controllerBlog.get_b(req, res);
     })
-
   .delete(function(req, res){
     if(!blog[req.params.id]){       //blog id doesn't exist
       not_found(req, res);
@@ -203,6 +215,6 @@ router.route('/blog/:id(\\d+)') // \\d+ == digit (regex, at least one)
       return;
     }
     controllerBlog.edit_b(req, res);
-  );
+  });
 
 module.exports = router;
