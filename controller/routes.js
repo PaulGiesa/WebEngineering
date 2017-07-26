@@ -32,20 +32,6 @@ function not_found(req, res){
   });
 }
 
-/*
-function hidden_no_auth(req, res){
-  if(!blog[req.params.id]){       //blog id doesn't exist
-    not_found(req, res);
-    return;
-  }
-
-  if(!isAuthenticated && blog[req.params.id].hidden){  //not accessible -> hidden = true
-    not_authorized_401(req,res);
-    return;
-  }
-}
-*/
-
 // basic route
 router.get('/', function(req, res) {
     res.send('Welcome to Stiiift-Site!');

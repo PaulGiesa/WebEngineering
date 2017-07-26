@@ -83,11 +83,11 @@ exports.create_b = function(req, res){
     released : new Date(),
     //TODO find a way to display date in the format of other blogs
 
-    hidden : req.body.hidden,
+    hidden : (req.body.hidden ==="true"),
     tags : req.body.tags
   };
 
-  blog.push(blogpost);
+  blog[index]=blogpost;
 
   fs.writeFile('./model/blog.json', JSON.stringify(blog), 'utf-8', (err) => {
     if (err) {
