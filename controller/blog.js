@@ -66,7 +66,7 @@ exports.create_b = function(req, res){
   }
 
   //get next free index
-  var index = 0,
+  var index = 0;
   while(blog[index] != undefined || blog[index] != null)
   {
     index=index+1;
@@ -74,8 +74,8 @@ exports.create_b = function(req, res){
 
   var blogpost =
   {
-    _id : Math.random().toString(36).substr(2, 16);
-    index : index
+    _id : Math.random().toString(36).substr(2, 16),
+    index : index,
     title : req.body.title,
     picture : req.body.picture,
     author : req.body.author,
