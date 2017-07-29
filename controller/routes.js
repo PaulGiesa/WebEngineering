@@ -13,16 +13,16 @@ var controllerBlog = require('../controller/blog'); // functions of blog
 exports.forbidden_token = function (req, res){
   res.status(403).send({
           success: false,
-          message: 'Wrong token'
+          message: 'Authentication failed. Wrong token'
       });
 }
-function not_authorized_401(req, res){
+exports.not_authorized_401 = function (req, res){
   res.status(401).send({
         success: false,
         message: 'No valid authentification'
   });
 }
-function not_found(req, res){
+exports.not_found = function (req, res){
   res.status(404).send({
         success: false,
         message: 'Page not found'
@@ -125,6 +125,8 @@ router.route('/blog/:id(\\d+)') // \\d+ == digit (regex, at least one)
     }
     controllerBlog.get_b(req, res);
     })
+
+
   .delete(function(req, res){
     if(!blog[req.params.id]){       //blog id doesn't exist
       not_found(req, res);
@@ -137,6 +139,8 @@ router.route('/blog/:id(\\d+)') // \\d+ == digit (regex, at least one)
     }
     controllerBlog.delete_b(req,res);
   })
+
+
   .put(function(req, res){
     if(!blog[req.params.id]){       //blog id doesn't exist
       not_found(req, res);
