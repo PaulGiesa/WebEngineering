@@ -32,6 +32,10 @@ exports.passwordRecovery = function (req,res){
       res.json({ success: false, message: 'Authentication failed. Wrong password.' });
       return;
     }
+    if (req.body.newPassword == '' || req.body.newPassword == undefined){
+      res.json({ success: false, message: 'Please enter a valid password as new password.' });
+      return;
+    }
    user.password = req.body.newPassword;
    var token = jwt.sign({
      expiresInMinutes: 60*24, // 24h
