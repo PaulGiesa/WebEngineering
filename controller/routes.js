@@ -16,13 +16,13 @@ exports.forbidden_token = function (req, res){
           message: 'Authentication failed. Wrong token'
       });
 }
-exports.not_authorized_401 = function (req, res){
+not_authorized_401 = function (req, res){
   res.status(401).send({
         success: false,
-        message: 'No valid authentification'
+        message: 'No valid authentication'
   });
 }
-exports.not_found = function (req, res){
+not_found = function (req, res){
   res.status(404).send({
         success: false,
         message: 'Page not found'
