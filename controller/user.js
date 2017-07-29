@@ -1,37 +1,56 @@
+var user = require('../model/user.json');
+var jwt = require('jsonwebtoken');
+var routes = require('../controller/routes.js')
 
-
- function login(req, res){
-   // find the user
-   User.find({
-    name: req.body.name
-    }, function(err, user) {
-
-    if (err) throw err;
-
-    if (!user) {
-      res.json({ success: false, message: 'Authentication failed. User not found.' });
-    } else if (user) {
-
-      // check if password matches
-      if (user.password != req.body.password) {
-        res.json({ success: false, message: 'Authentication failed. Wrong password.' });
-      } else {
-
-        // if user is found and password is right
-        // create a token
-        var token = jwt.sign(user, app.get('superSecret'), {
-          expiresInMinutes: 1440 // expires in 24 hours
-        });
-
-        // return the information including token as JSON
-        res.json({
-          success: true,
-          message: 'Enjoy your token!',
-          token: token
-        });
-      }
-
-    }
-
+exports.login = function(req, res){
+  // username correct?
+  if (req.body.username != user.username) {
+    res.json({ success: false, message: 'Authentication failed. User not found.'});
+    return;
+  }
+  // password correct?
+  if (req.body.password != user.password) {
+    res.json({ success: false, message: 'Authentication failed. Wrong password.' });
+    return;
+  }
+  var token = jwt.sign({
+   expiresInMinutes: 60*24, // 24h
+   username: user.username
+  }, 'TheSecretIsAStiiift');
+  // return the information including token as JSON
+  res.json({
+   success: true,
+   message: 'So 1 awesome token created' + ' - Hallo I bims 1 Token, lol',
+   token: token
   });
+};
+
+exports.passwordRecovery = function (req,res){
+  if(res.locals.isAuthenticated){
+    // password correct?
+    if (req.body.password != user.password) {
+      res.json({ success: false, message: 'Authentication failed. Wrong password.' });
+      return;
+    }
+   user.password = req.body.newPassword;
+   var token = jwt.sign({
+     expiresInMinutes: 60*24, // 24h
+     username: user.username
+   }, 'TheSecretIsAStiiift');
+
+   var fs = require('fs');
+
+   fs.writeFile('./model/user.json', JSON.stringify(user), 'utf-8', (err) => {
+     if (err) {
+       res.status(500).json({error: err});
+     } else {
+       res.status(200).json({
+         token: token,
+        message: 'Password changed successfully'});
+     }
+   });
+ }
+ else{
+   routes.forbidden_token(req, res);
+ }
 };

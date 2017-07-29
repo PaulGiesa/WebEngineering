@@ -9,11 +9,8 @@ var controllerUser = require('../controller/user'); // functions of user
 var controllerBlog = require('../controller/blog'); // functions of blog
 // Wurzelroute in Server.js definiert --> /api/V1
 
-var isAuthenticated = false;
-
 //Error-Messages
-//TODO wenn hidden == true - beide
-function forbidden_token(req, res){
+exports.forbidden_token = function (req, res){
   res.status(403).send({
           success: false,
           message: 'Wrong token'
@@ -46,29 +43,7 @@ router.get('/', function(req, res) {
 //    password    xx
 
 router.put('/login', function(req, res) {
-  // username correct?
-  if (req.body.username != user.username) {
-    res.json({ success: false, message: 'Authentication failed. User not found.' + user.username + " res " + req.body.username});
-    return;
-  } else{
-
-    // password correct?
-    if (req.body.password != user.password) {
-      res.json({ success: false, message: 'Authentication failed. Wrong password.' });
-    } else {
-
-      var token = jwt.sign({
-        expiresInMinutes: 60*24, // 24h
-        username: user.username
-      }, 'TheSecretIsAStiiift');
-      // return the information including token as JSON
-      res.json({
-        success: true,
-        message: 'So 1 awesome token created' + ' - Hallo I bims 1 Token, lol',
-        token: token
-      });
-    }
-  }
+  controllerUser.login(req,res)
 });
 
 // route middleware to verify a token
@@ -84,12 +59,12 @@ router.use(function(req, res, next) {
     // verifies secret and checks exp
     jwt.verify(token,'TheSecretIsAStiiift', function(err, decoded) {
       if (err) {
-        isAuthenticated = false;
+        res.locals.isAuthenticated = false;
         next();
 
       } else {
         // if everything is good, save to request for use in other routes
-        isAuthenticated = true;
+        res.locals.isAuthenticated = true;
         req.decoded = decoded;
         next();
       }
@@ -97,45 +72,17 @@ router.use(function(req, res, next) {
 
   } else {
     // if there is no token
-    isAuthenticated = false;
+    res.locals.isAuthenticated = false;
     next();
   }
 });
 
 router.get('/', function(req, res) {
-  res.json({ message: 'Welcome to the coolest API on earth!' });
+  res.json({ message: 'Welcome to the most awesome API on earth!' });
 });
 
 router.put('/passwordRecovery', function(req, res){
-  if(isAuthenticated){
-     if (req.body.password != user.password) {
-     res.status(403).json({
-       message: 'Your Password is wrong!'
-     });
-     return;
-   }
-
-   user.password = req.body.newPassword;
-   var token = jwt.sign({
-     expiresInMinutes: 60*24, // 24h
-     username: user.username
-   }, 'TheSecretIsAStiiift');
-
-   var fs = require('fs');
-
-   fs.writeFile('./model/user.json', JSON.stringify(user), 'utf-8', (err) => {
-     if (err) {
-       res.status(500).json({error: err});
-     } else {
-       res.status(200).json({
-         token: token,
-        message: 'Password changed successfully'});
-     }
-   });
- }
- else{
-   forbidden_token(req, res);
- }
+  controllerUser.passwordRecovery(req,res)
 });
 
 //need key "x-access-token" in header with jwt key as value
@@ -143,7 +90,7 @@ router.put('/passwordRecovery', function(req, res){
 router.route('/blog')
 
   .get(function(req, res){
-    if(isAuthenticated){
+    if(res.locals.isAuthenticated){
       res.json(blog);
     }
     else{
@@ -154,7 +101,7 @@ router.route('/blog')
   })
 
   .post(function(req, res){
-    if(!isAuthenticated){  //not accessible -> hidden = true
+    if(!res.locals.isAuthenticated){  //not accessible -> hidden = true
       not_authorized_401(req,res);
       return;
     }
@@ -172,7 +119,7 @@ router.route('/blog/:id(\\d+)') // \\d+ == digit (regex, at least one)
       return;
     }
 
-    if(!isAuthenticated && blog[req.params.id].hidden){  //not accessible -> hidden = true
+    if(!res.locals.isAuthenticated && blog[req.params.id].hidden){  //not accessible -> hidden = true
       not_authorized_401(req,res);
       return;
     }
@@ -184,7 +131,7 @@ router.route('/blog/:id(\\d+)') // \\d+ == digit (regex, at least one)
       return;
     }
 
-    if(!isAuthenticated && blog[req.params.id].hidden){  //not accessible -> hidden = true
+    if(!res.locals.isAuthenticated && blog[req.params.id].hidden){  //not accessible -> hidden = true
       not_authorized_401(req,res);
       return;
     }
@@ -196,7 +143,7 @@ router.route('/blog/:id(\\d+)') // \\d+ == digit (regex, at least one)
       return;
     }
 
-    if(!isAuthenticated && blog[req.params.id].hidden){  //not accessible -> hidden = true
+    if(!res.locals.isAuthenticated && blog[req.params.id].hidden){  //not accessible -> hidden = true
       not_authorized_401(req,res);
       return;
     }

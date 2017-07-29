@@ -5,7 +5,7 @@ var morgan      = require('morgan');
 
 var jwt    = require('jsonwebtoken'); // used to create, sign, and verify tokens
 var config = require('./config'); // get config file
-var user = require('./model/user'); // get users from file
+var user   = require('./model/user'); // get users from file
 
 var routes = require('./controller/routes'); //routes defined here
 
@@ -32,4 +32,4 @@ app.use(morgan('dev'));
 // start the server ======
 // =======================
 app.listen(port);
-console.log('Stiiift needed at http://localhost:' + port);
+console.log('Stiiift needed at http://localhost:' + port +"\n" + "Awesome kittens too!");
